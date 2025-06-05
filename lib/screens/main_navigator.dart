@@ -20,6 +20,11 @@ class _MainNavigatorState extends State<MainNavigator> {
   Widget build(BuildContext context) {
     final showTest = context.watch<AppState>().showTestTab;
 
+    // If the test tab is disabled while it was active, reset to the first tab
+    if (!showTest && _currentIndex >= 2) {
+      _currentIndex = 0;
+    }
+
     final screens = [
       const EvidenceScreen(),
       const HistoryScreen(),
