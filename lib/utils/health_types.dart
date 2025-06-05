@@ -168,19 +168,29 @@ class HealthService {
 
     final Map<String, dynamic> result = {};
     final today = DateTime(now.year, now.month, now.day);
+    final todayStart = DateTime(today.year, today.month, today.day, 0, 0, 0);
 
+    debugPrint('[DEBUG] Tražim korake za: $todayStart');
+
+    // Koraci: SAMO 00:00:00
     final stepsList = data
         .where((e) => e.type == HealthDataType.STEPS &&
             e.value is NumericHealthValue &&
-            e.dateFrom.isAfter(today))
+            e.dateFrom == todayStart)
         .toList();
-    double stepsMax = 0;
-    for (var p in stepsList) {
-      final v = (p.value as NumericHealthValue).numericValue.toDouble();
-      if (v > stepsMax) stepsMax = v;
+    
+    debugPrint('[DEBUG] Pronađeni koraci:');
+    for (var step in stepsList) {
+      debugPrint('[DEBUG] Koraci: ${(step.value as NumericHealthValue).numericValue} @ ${step.dateFrom}');
     }
-    result['koraci'] = stepsMax.toInt();
+    
+    result['koraci'] = stepsList.isNotEmpty 
+        ? (stepsList.first.value as NumericHealthValue).numericValue.toInt()
+        : 0;
+    
+    debugPrint('[DEBUG] Korišćeni koraci: ${result['koraci']} @ ${stepsList.isNotEmpty ? stepsList.first.dateFrom : "nema podataka"}');
 
+    // Kalorije: poslednji rezultat
     final calorieList = data
         .where((e) => e.type == HealthDataType.ACTIVE_ENERGY_BURNED &&
             e.value is NumericHealthValue &&
@@ -188,11 +198,12 @@ class HealthService {
         .toList();
     double calorieSum = 0;
     for (var p in calorieList) {
-      calorieSum +=
-          (p.value as NumericHealthValue).numericValue.toDouble();
+      calorieSum += (p.value as NumericHealthValue).numericValue.toDouble();
     }
     result['kalorije'] = calorieSum > 0 ? calorieSum.toInt() : '';
+    debugPrint('[DEBUG] Kalorije: $calorieSum (${calorieList.length} merenja)');
 
+    // Puls: poslednji rezultat
     final pulseList = data
         .where((e) => e.type == HealthDataType.HEART_RATE &&
             e.value is NumericHealthValue)
@@ -200,58 +211,72 @@ class HealthService {
     result['puls'] = pulseList.isNotEmpty
         ? (pulseList.last.value as NumericHealthValue).numericValue.toInt()
         : '';
+    debugPrint('[DEBUG] Puls: ${result['puls']} (${pulseList.length} merenja)');
 
+    // Temperatura: poslednji rezultat
     final tempList = data
         .where((e) => e.type == HealthDataType.BODY_TEMPERATURE &&
             e.value is NumericHealthValue)
         .toList();
     result['temperatura'] = tempList.isNotEmpty
-        ? (tempList.last.value as NumericHealthValue)
-            .numericValue
-            .toStringAsFixed(1)
+        ? (tempList.last.value as NumericHealthValue).numericValue.toStringAsFixed(1)
         : '';
+    debugPrint('[DEBUG] Temperatura: ${result['temperatura']} (${tempList.length} merenja)');
 
-    final oxyList = data
+    // Saturacija: poslednji rezultat
+    final satList = data
         .where((e) => e.type == HealthDataType.BLOOD_OXYGEN &&
             e.value is NumericHealthValue)
         .toList();
-    result['saturacija'] = oxyList.isNotEmpty
-        ? (oxyList.last.value as NumericHealthValue).numericValue
+    result['saturacija'] = satList.isNotEmpty
+        ? (satList.last.value as NumericHealthValue).numericValue
         : '';
+    debugPrint('[DEBUG] Saturacija: ${result['saturacija']} (${satList.length} merenja)');
 
-    final sleepList = data
+    // San: poslednji rezultat
+    final sanList = data
         .where((e) => e.type == HealthDataType.SLEEP_SESSION &&
             e.value is NumericHealthValue &&
             e.dateFrom.isAfter(today))
         .toList();
-    double sleepMin = 0;
-    for (var p in sleepList) {
-      sleepMin += (p.value as NumericHealthValue).numericValue.toDouble();
+    double sanMin = 0.0;
+    for (var p in sanList) {
+      sanMin += (p.value as NumericHealthValue).numericValue.toDouble();
     }
-    final h = sleepMin ~/ 60;
-    final m = (sleepMin % 60).toInt().toString().padLeft(2, '0');
-    result['san'] = sleepMin > 0 ? '${h}h ${m}min' : '';
+    final sanH = sanMin ~/ 60;
+    final sanM = (sanMin % 60).toInt().toString().padLeft(2, '0');
+    result['san'] = sanMin > 0 ? '${sanH}h ${sanM}min' : '';
+    debugPrint('[DEBUG] San: $sanMin min (${sanList.length} merenja)');
 
-    result['tezina'] = _latestWeight(data);
+    // Težina: poslednji rezultat
+    final tezinaList = data
+        .where((e) => e.type == HealthDataType.WEIGHT &&
+            e.value is NumericHealthValue)
+        .toList();
+    result['tezina'] = tezinaList.isNotEmpty
+        ? (tezinaList.last.value as NumericHealthValue).numericValue.toStringAsFixed(1)
+        : '';
+    debugPrint('[DEBUG] Težina: ${result['tezina']} (${tezinaList.length} merenja)');
 
-    final heightList = data
+    // Visina: poslednji rezultat
+    final visinaList = data
         .where((e) => e.type == HealthDataType.HEIGHT &&
             e.value is NumericHealthValue)
         .toList();
-    double height = 0.0;
-    if (heightList.isNotEmpty) {
-      heightList.sort((a, b) => a.dateTo.compareTo(b.dateTo));
-      height =
-          (heightList.last.value as NumericHealthValue).numericValue.toDouble() *
-              100;
+    double visina = 0.0;
+    if (visinaList.isNotEmpty) {
+      visinaList.sort((a, b) => a.dateTo.compareTo(b.dateTo));
+      visina = (visinaList.last.value as NumericHealthValue).numericValue.toDouble() * 100;
+      debugPrint('[DEBUG] Visina iz Health Connect-a: $visina cm (${visinaList.length} merenja)');
     } else {
-      height = 188.2;
+      visina = 188.2;
+      debugPrint('[DEBUG] Visina nije pronađena, koristi se podrazumevana: $visina cm');
     }
-    result['visina'] = height.toStringAsFixed(1);
+    result['visina'] = visina.toStringAsFixed(1);
 
-    if (result['tezina'] != '' && height > 0) {
+    if (result['tezina'] != '' && visina > 0) {
       final weight = double.parse(result['tezina']);
-      final bmi = weight / ((height / 100) * (height / 100));
+      final bmi = weight / ((visina / 100) * (visina / 100));
       result['bmi'] = bmi.toStringAsFixed(1);
     } else {
       result['bmi'] = '';

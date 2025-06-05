@@ -4,7 +4,6 @@ import '../widgets/custom_button.dart';
 import 'settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../state/app_state.dart';
-import '../widgets/event_card.dart';
 import '../utils/health_types.dart';
 
 class EvidenceScreen extends StatefulWidget {
@@ -35,18 +34,11 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
     _refreshHealthData();
   }
 
-  void _refreshHealthData() {
+  Future<void> _refreshHealthData() async {
     setState(() {
       _healthDataFuture = _healthService.fetchSummary();
     });
-  }
-
-  Future<Map<String, dynamic>> _fetchLatestHealthData() async {
-    final data = await _healthService.fetchSummary();
-    setState(() {
-      _healthDataFuture = Future.value(data);
-    });
-    return data;
+    await _healthDataFuture;
   }
 
   @override
@@ -91,8 +83,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
-                final healthData = await _fetchLatestHealthData();
-                print('[DEBUG] HealthData: $healthData');
+                await _refreshHealthData();
+                final healthData = await _healthDataFuture;
+                debugPrint('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -113,7 +106,6 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     healthData: healthData,
                   ),
                 );
-                _refreshHealthData(); // Refresh after adding event
               },
             ),
             const SizedBox(height: 16),
@@ -125,7 +117,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
-                final healthData = await _fetchLatestHealthData();
+                final healthData = await _healthDataFuture;
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
                   if (mounted) {
@@ -159,7 +151,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
-                final healthData = await _fetchLatestHealthData();
+                final healthData = await _healthDataFuture;
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
                   if (mounted) {
@@ -193,7 +185,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               height: 56,
               onPressed: () async {
                 HapticFeedback.selectionClick();
-                final healthData = await _fetchLatestHealthData();
+                final healthData = await _healthDataFuture;
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
                   if (mounted) {
