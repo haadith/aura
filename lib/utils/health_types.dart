@@ -125,3 +125,151 @@ String getUnitForType(HealthDataType type) =>
 
 IconData? getIconForType(HealthDataType type) =>
     kSupportedHealthTypes[type]?['icon'];
+
+/// Service koji obezbeđuje dohvat i obradu Health Connect podataka.
+class HealthService {
+  final Health _health = Health();
+
+  Future<bool> _requestAuth(List<HealthDataType> types) async {
+    final permissions = List.filled(types.length, HealthDataAccess.READ);
+    return _health.requestAuthorization(types, permissions: permissions);
+  }
+
+  Future<List<HealthDataPoint>> _fetchRaw(
+      List<HealthDataType> types, DateTime start, DateTime end) async {
+    if (!await _requestAuth(types)) return [];
+    final results = await _health.getHealthDataFromTypes(
+      types: types,
+      startTime: start,
+      endTime: end,
+    );
+    return _health.removeDuplicates(results);
+  }
+
+  /// Vraća mapu agregiranih vrednosti sličnu onoj koja se koristi u
+  /// `EvidenceScreen` za beleženje događaja.
+  Future<Map<String, dynamic>> fetchSummary() async {
+    final now = DateTime.now();
+    final fiveDaysAgo = now.subtract(const Duration(days: 5));
+
+    final types = [
+      HealthDataType.STEPS,
+      HealthDataType.HEART_RATE,
+      HealthDataType.BODY_TEMPERATURE,
+      HealthDataType.BLOOD_OXYGEN,
+      HealthDataType.ACTIVE_ENERGY_BURNED,
+      HealthDataType.SLEEP_SESSION,
+      HealthDataType.WEIGHT,
+      HealthDataType.HEIGHT,
+    ];
+
+    final data = await _fetchRaw(types, fiveDaysAgo, now);
+    if (data.isEmpty) return {};
+
+    final Map<String, dynamic> result = {};
+    final today = DateTime(now.year, now.month, now.day);
+
+    final stepsList = data
+        .where((e) => e.type == HealthDataType.STEPS &&
+            e.value is NumericHealthValue &&
+            e.dateFrom.isAfter(today))
+        .toList();
+    double stepsMax = 0;
+    for (var p in stepsList) {
+      final v = (p.value as NumericHealthValue).numericValue.toDouble();
+      if (v > stepsMax) stepsMax = v;
+    }
+    result['koraci'] = stepsMax.toInt();
+
+    final calorieList = data
+        .where((e) => e.type == HealthDataType.ACTIVE_ENERGY_BURNED &&
+            e.value is NumericHealthValue &&
+            e.dateFrom.isAfter(today))
+        .toList();
+    double calorieSum = 0;
+    for (var p in calorieList) {
+      calorieSum +=
+          (p.value as NumericHealthValue).numericValue.toDouble();
+    }
+    result['kalorije'] = calorieSum > 0 ? calorieSum.toInt() : '';
+
+    final pulseList = data
+        .where((e) => e.type == HealthDataType.HEART_RATE &&
+            e.value is NumericHealthValue)
+        .toList();
+    result['puls'] = pulseList.isNotEmpty
+        ? (pulseList.last.value as NumericHealthValue).numericValue.toInt()
+        : '';
+
+    final tempList = data
+        .where((e) => e.type == HealthDataType.BODY_TEMPERATURE &&
+            e.value is NumericHealthValue)
+        .toList();
+    result['temperatura'] = tempList.isNotEmpty
+        ? (tempList.last.value as NumericHealthValue)
+            .numericValue
+            .toStringAsFixed(1)
+        : '';
+
+    final oxyList = data
+        .where((e) => e.type == HealthDataType.BLOOD_OXYGEN &&
+            e.value is NumericHealthValue)
+        .toList();
+    result['saturacija'] = oxyList.isNotEmpty
+        ? (oxyList.last.value as NumericHealthValue).numericValue
+        : '';
+
+    final sleepList = data
+        .where((e) => e.type == HealthDataType.SLEEP_SESSION &&
+            e.value is NumericHealthValue &&
+            e.dateFrom.isAfter(today))
+        .toList();
+    double sleepMin = 0;
+    for (var p in sleepList) {
+      sleepMin += (p.value as NumericHealthValue).numericValue.toDouble();
+    }
+    final h = sleepMin ~/ 60;
+    final m = (sleepMin % 60).toInt().toString().padLeft(2, '0');
+    result['san'] = sleepMin > 0 ? '${h}h ${m}min' : '';
+
+    result['tezina'] = _latestWeight(data);
+
+    final heightList = data
+        .where((e) => e.type == HealthDataType.HEIGHT &&
+            e.value is NumericHealthValue)
+        .toList();
+    double height = 0.0;
+    if (heightList.isNotEmpty) {
+      heightList.sort((a, b) => a.dateTo.compareTo(b.dateTo));
+      height =
+          (heightList.last.value as NumericHealthValue).numericValue.toDouble() *
+              100;
+    } else {
+      height = 188.2;
+    }
+    result['visina'] = height.toStringAsFixed(1);
+
+    if (result['tezina'] != '' && height > 0) {
+      final weight = double.parse(result['tezina']);
+      final bmi = weight / ((height / 100) * (height / 100));
+      result['bmi'] = bmi.toStringAsFixed(1);
+    } else {
+      result['bmi'] = '';
+    }
+
+    return result;
+  }
+
+  String _latestWeight(List<HealthDataPoint> data) {
+    final list = data
+        .where((e) => e.type == HealthDataType.WEIGHT &&
+            e.value is NumericHealthValue)
+        .toList();
+    if (list.isEmpty) return '';
+    list.sort((a, b) => b.dateTo.compareTo(a.dateTo));
+    final weight =
+        (list.first.value as NumericHealthValue).numericValue.toDouble();
+    return weight > 0 ? weight.toStringAsFixed(1) : '';
+  }
+}
+
