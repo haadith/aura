@@ -41,6 +41,14 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
     });
   }
 
+  Future<Map<String, dynamic>> _fetchLatestHealthData() async {
+    final data = await _healthService.fetchSummary();
+    setState(() {
+      _healthDataFuture = Future.value(data);
+    });
+    return data;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,7 +91,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
-                final healthData = await _healthDataFuture;
+                final healthData = await _fetchLatestHealthData();
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
                   if (mounted) {
@@ -117,7 +125,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
-                final healthData = await _healthDataFuture;
+                final healthData = await _fetchLatestHealthData();
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
                   if (mounted) {
@@ -151,7 +159,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
-                final healthData = await _healthDataFuture;
+                final healthData = await _fetchLatestHealthData();
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
                   if (mounted) {
@@ -185,7 +193,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               height: 56,
               onPressed: () async {
                 HapticFeedback.selectionClick();
-                final healthData = await _healthDataFuture;
+                final healthData = await _fetchLatestHealthData();
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
                   if (mounted) {
