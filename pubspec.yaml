@@ -1,0 +1,70 @@
+name: aura
+description: "Personal debug app for epilepsy monitoring."
+publish_to: 'none' # Private project, not for pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.3.4
+
+dependencies:
+  flutter_localizations:
+    sdk: flutter
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  device_info_plus: ^10.0.1
+
+  # 📦 Local database and file paths
+  sqflite: ^2.4.2
+  path: ^1.9.1
+  path_provider: ^2.1.5
+
+  # 🔄 State management
+  provider: ^6.1.5
+
+  # 🕓 Date and time formatting
+  intl: ^0.20.2
+
+  # 📊 Charts and UI components
+  fl_chart: ^1.0.0
+  getwidget: ^6.0.0
+  google_fonts: ^6.2.1
+  flutter_slidable: ^4.0.0
+  calendar_date_picker2: ^2.0.1
+  modal_bottom_sheet: ^3.0.0
+  another_flushbar: ^1.12.30
+
+  # 📍 Location, maps & permissions
+  geolocator: ^14.0.1
+  google_maps_flutter: ^2.12.2
+  permission_handler: ^12.0.0+1
+
+  # 🧠 Health Connect / Samsung Health integration
+  health: ^12.2.1
+  #health: 10.2.0
+
+  # 🌐 Network
+  http: ^1.4.0
+
+  # 🔔 Toasts
+  fluttertoast: ^8.2.12
+
+  # ⚙️ Local settings
+  shared_preferences: ^2.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter:
+  uses-material-design: true
+
+flutter_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#121C34"  # tamna pozadina
+  adaptive_icon_foreground: "assets/icon/icon.png"

@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'test_screen.dart';
+import 'history_screen.dart';
+import '../state/app_state.dart';
+import 'evidence_screen.dart';
+
+
+class MainNavigator extends StatefulWidget {
+  const MainNavigator({super.key});
+
+  @override
+  State<MainNavigator> createState() => _MainNavigatorState();
+}
+
+class _MainNavigatorState extends State<MainNavigator> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final showTest = context.watch<AppState>().showTestTab;
+
+    final screens = [
+      const EvidenceScreen(),
+      const HistoryScreen(),
+      if (showTest) const TestScreen(),
+    ];
+
+    final items = [
+      const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Početna'),
+      const BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Istorija'),
+      if (showTest)
+        const BottomNavigationBarItem(icon: Icon(Icons.science), label: 'Test'),
+    ];
+
+    return Scaffold(
+      body: screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.deepPurpleAccent,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: items,
+      ),
+    );
+  }
+}
