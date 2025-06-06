@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 
 class Event {
   final String type;
@@ -28,12 +29,15 @@ class Event {
 class AppState extends ChangeNotifier {
   bool _showTestTab = false;
   double? _height;
+  String? _currentLocation;
 
   bool get showTestTab => _showTestTab;
   double? get height => _height;
+  String? get currentLocation => _currentLocation;
 
   AppState() {
     _loadHeight();
+    _initLocation();
   }
 
   Future<void> _loadHeight() async {
@@ -52,6 +56,24 @@ class AppState extends ChangeNotifier {
   void setShowTestTab(bool value) {
     _showTestTab = value;
     notifyListeners();
+  }
+
+  Future<void> _initLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+    if (permission == LocationPermission.deniedForever) return;
+
+    try {
+      final pos = await Geolocator.getCurrentPosition();
+      _currentLocation = '${pos.latitude},${pos.longitude}';
+      notifyListeners();
+    } catch (_) {}
   }
 
   // Lista događaja
