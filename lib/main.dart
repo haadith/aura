@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'utils/permissions_helper.dart';
 import 'screens/main_navigator.dart';
 import 'state/app_state.dart';
+import "state/therapy_state.dart";
 
 
 void main() async {
@@ -13,8 +14,11 @@ void main() async {
 
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppState(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppState()),
+        ChangeNotifierProvider(create: (_) => TherapyState()),
+      ],
       child: const AuraApp(),
     ),
   );
