@@ -6,6 +6,7 @@ import 'settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 import '../utils/health_types.dart';
+import 'main_navigator.dart';
 
 class EvidenceScreen extends StatefulWidget {
   const EvidenceScreen({super.key});
@@ -81,7 +82,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
+                final appState = Provider.of<AppState>(context, listen: false);
                 await _refreshHealthData();
+                if (!mounted) return;
                 final healthData = await _healthDataFuture;
                 debugPrint('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
@@ -91,7 +94,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     );
                   }
                 }
-                Provider.of<AppState>(context, listen: false).addEvent(
+                appState.addEvent(
                   Event(
                     type: 'Blag',
                     title: 'Blag',
@@ -104,6 +107,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     healthData: healthData,
                   ),
                 );
+                if (!mounted) return;
+                final mainNavState = context.findAncestorStateOfType<MainNavigatorState>();
+                mainNavState?.setTab(1);
               },
             ),
             const SizedBox(height: 16),
@@ -115,6 +121,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
+                final appState = Provider.of<AppState>(context, listen: false);
+                await _refreshHealthData();
+                if (!mounted) return;
                 final healthData = await _healthDataFuture;
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
@@ -124,7 +133,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     );
                   }
                 }
-                Provider.of<AppState>(context, listen: false).addEvent(
+                appState.addEvent(
                   Event(
                     type: 'Umeren',
                     title: 'Umeren',
@@ -133,12 +142,13 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     dateTime: DateTime.now(),
                     okolnost: _selectedOkolnost,
                     trajanje: _selectedTrajanje,
-                    geolokacija:
-                        Provider.of<AppState>(context, listen: false)
-                            .currentLocation,
+                    geolokacija: appState.currentLocation,
                     healthData: healthData,
                   ),
                 );
+                if (!mounted) return;
+                final mainNavState = context.findAncestorStateOfType<MainNavigatorState>();
+                mainNavState?.setTab(1);
                 _refreshHealthData(); // Refresh after adding event
               },
             ),
@@ -151,6 +161,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               fontSize: 20,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
+                final appState = Provider.of<AppState>(context, listen: false);
+                await _refreshHealthData();
+                if (!mounted) return;
                 final healthData = await _healthDataFuture;
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
@@ -160,7 +173,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     );
                   }
                 }
-                Provider.of<AppState>(context, listen: false).addEvent(
+                appState.addEvent(
                   Event(
                     type: 'Težak',
                     title: 'Težak',
@@ -169,12 +182,13 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     dateTime: DateTime.now(),
                     okolnost: _selectedOkolnost,
                     trajanje: _selectedTrajanje,
-                    geolokacija:
-                        Provider.of<AppState>(context, listen: false)
-                            .currentLocation,
+                    geolokacija: appState.currentLocation,
                     healthData: healthData,
                   ),
                 );
+                if (!mounted) return;
+                final mainNavState = context.findAncestorStateOfType<MainNavigatorState>();
+                mainNavState?.setTab(1);
                 _refreshHealthData(); // Refresh after adding event
               },
             ),
@@ -187,6 +201,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
               height: 56,
               onPressed: () async {
                 HapticFeedback.selectionClick();
+                final appState = Provider.of<AppState>(context, listen: false);
+                await _refreshHealthData();
+                if (!mounted) return;
                 final healthData = await _healthDataFuture;
                 print('[DEBUG] HealthData: $healthData');
                 if (healthData.isEmpty) {
@@ -196,7 +213,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     );
                   }
                 }
-                Provider.of<AppState>(context, listen: false).addEvent(
+                appState.addEvent(
                   Event(
                     type: 'Frisium',
                     title: 'Frisium',
@@ -205,12 +222,13 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     dateTime: DateTime.now(),
                     okolnost: _selectedOkolnost,
                     trajanje: _selectedTrajanje,
-                    geolokacija:
-                        Provider.of<AppState>(context, listen: false)
-                            .currentLocation,
+                    geolokacija: appState.currentLocation,
                     healthData: healthData,
                   ),
                 );
+                if (!mounted) return;
+                final mainNavState = context.findAncestorStateOfType<MainNavigatorState>();
+                mainNavState?.setTab(1);
                 _refreshHealthData(); // Refresh after adding event
               },
             ),

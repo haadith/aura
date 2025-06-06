@@ -4,8 +4,6 @@ import '../state/therapy_state.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'settings_screen.dart';
 
-
-
 class TerapijaScreen extends StatelessWidget {
   const TerapijaScreen({super.key});
 
@@ -46,7 +44,7 @@ class TerapijaScreen extends StatelessWidget {
                     const Text(
                       'Dnevna terapija',
                       style: TextStyle(
-                        color: Color(0xFF23408E),
+                        //color: Color(0xFF23408E),
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                         letterSpacing: 0.5,
@@ -105,7 +103,8 @@ class TerapijaScreen extends StatelessWidget {
   }
 
   static String _formatTime(DateTime dt) {
-    return dt.hour.toString().padLeft(2, '0') + ':' + dt.minute.toString().padLeft(2, '0');
+    return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    //return dt.hour.toString().padLeft(2, '0') + ':' + dt.minute.toString().padLeft(2, '0');
   }
 }
 
