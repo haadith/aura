@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/weather_service.dart';
 
 class Event {
   final String type;
@@ -28,12 +29,15 @@ class Event {
 class AppState extends ChangeNotifier {
   bool _showTestTab = false;
   double? _height;
+  WeatherData? _weather;
 
   bool get showTestTab => _showTestTab;
   double? get height => _height;
+  WeatherData? get weather => _weather;
 
   AppState() {
     _loadHeight();
+    fetchWeather();
   }
 
   Future<void> _loadHeight() async {
@@ -51,6 +55,13 @@ class AppState extends ChangeNotifier {
 
   void setShowTestTab(bool value) {
     _showTestTab = value;
+    notifyListeners();
+  }
+
+  Future<void> fetchWeather() async {
+    final service = WeatherService();
+    final data = await service.fetchCurrentWeather();
+    _weather = data;
     notifyListeners();
   }
 

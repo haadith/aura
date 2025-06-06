@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/custom_button.dart';
+import '../widgets/weather_widget.dart';
 import 'settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../state/app_state.dart';
@@ -67,7 +68,8 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 8),
+            const WeatherWidget(),
+            const SizedBox(height: 16),
             const Center(
               child: Text(
                 'Jačina napada',
