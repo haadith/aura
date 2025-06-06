@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/weather_service.dart';
+import 'package:geolocator/geolocator.dart';
 
 class Event {
   final String type;
@@ -30,10 +31,16 @@ class AppState extends ChangeNotifier {
   bool _showTestTab = false;
   double? _height;
   WeatherData? _weather;
+  String? _currentLocation;
+  double? _locationAccuracy;
+  String? _locationError;
 
   bool get showTestTab => _showTestTab;
   double? get height => _height;
   WeatherData? get weather => _weather;
+  String? get currentLocation => _currentLocation;
+  double? get locationAccuracy => _locationAccuracy;
+  String? get locationError => _locationError;
 
   AppState() {
     _loadHeight();
@@ -86,5 +93,44 @@ class AppState extends ChangeNotifier {
       _events[index] = newEvent;
       notifyListeners();
     }
+  }
+
+  Future<void> _initLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _locationError = 'Servis za lokaciju nije omogućen.';
+      notifyListeners();
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _locationError = 'Dozvola za lokaciju nije odobrena.';
+        notifyListeners();
+        return;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      _locationError = 'Dozvola za lokaciju je trajno odbijena.';
+      notifyListeners();
+      return;
+    }
+
+    try {
+      final pos = await Geolocator.getCurrentPosition();
+      _currentLocation = '${pos.latitude},${pos.longitude}';
+      _locationAccuracy = pos.accuracy;
+      _locationError = null;
+      notifyListeners();
+    } catch (e) {
+      _locationError = 'Greška pri dohvatanju lokacije.';
+      notifyListeners();
+    }
+  }
+
+  Future<void> retryLocation() async {
+    await _initLocation();
   }
 }

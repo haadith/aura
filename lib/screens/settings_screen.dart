@@ -7,6 +7,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Podešavanja'),
@@ -68,9 +69,53 @@ class SettingsScreen extends StatelessWidget {
                 );
               },
             ),
+            const SizedBox(height: 24),
+            _LocationStatusWidget(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LocationStatusWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    String statusText;
+    Color statusColor;
+    if (appState.locationError != null) {
+      statusText = 'Greška: ${appState.locationError}';
+      statusColor = Colors.red;
+    } else if (appState.currentLocation != null && appState.locationAccuracy != null) {
+      statusText = 'Lokacija: ${appState.currentLocation} (preciznost: ${appState.locationAccuracy?.toStringAsFixed(1)} m)';
+      statusColor = Colors.green[700]!;
+    } else {
+      statusText = 'Lokacija: učitavanje...';
+      statusColor = Colors.grey;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          statusText,
+          style: TextStyle(color: statusColor),
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton.icon(
+          onPressed: () => appState.retryLocation(),
+          icon: Icon(Icons.refresh),
+          label: Text('Pokušaj ponovo'),
+        ),
+        if (appState.locationError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              'DEBUG: ${appState.locationError}',
+              style: TextStyle(fontSize: 12, color: Colors.red[300]),
+            ),
+          ),
+      ],
     );
   }
 }

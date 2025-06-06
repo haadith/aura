@@ -137,7 +137,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     dateTime: DateTime.now(),
                     okolnost: _selectedOkolnost,
                     trajanje: _selectedTrajanje,
-                    geolokacija: 'dummy',
+                    geolokacija:
+                        Provider.of<AppState>(context, listen: false)
+                            .currentLocation,
                     healthData: healthData,
                   ),
                 );
@@ -171,7 +173,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     dateTime: DateTime.now(),
                     okolnost: _selectedOkolnost,
                     trajanje: _selectedTrajanje,
-                    geolokacija: 'dummy',
+                    geolokacija:
+                        Provider.of<AppState>(context, listen: false)
+                            .currentLocation,
                     healthData: healthData,
                   ),
                 );
@@ -205,7 +209,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     dateTime: DateTime.now(),
                     okolnost: _selectedOkolnost,
                     trajanje: _selectedTrajanje,
-                    geolokacija: 'dummy',
+                    geolokacija:
+                        Provider.of<AppState>(context, listen: false)
+                            .currentLocation,
                     healthData: healthData,
                   ),
                 );
