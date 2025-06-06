@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
+import '../utils/weather_service.dart';
 
 class Event {
   final String type;
@@ -30,15 +31,19 @@ class AppState extends ChangeNotifier {
   bool _showTestTab = false;
   double? _height;
   String? _currentLocation;
+  WeatherData? _weather;
 
   bool get showTestTab => _showTestTab;
   double? get height => _height;
   String? get currentLocation => _currentLocation;
+  WeatherData? get weather => _weather;
 
   AppState() {
     _loadHeight();
     _initLocation();
+    fetchWeather();
   }
+}
 
   Future<void> _loadHeight() async {
     final prefs = await SharedPreferences.getInstance();
@@ -58,23 +63,31 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _initLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
+Future<void> _initLocation() async {
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) return;
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
-    }
-    if (permission == LocationPermission.deniedForever) return;
-
-    try {
-      final pos = await Geolocator.getCurrentPosition();
-      _currentLocation = '${pos.latitude},${pos.longitude}';
-      notifyListeners();
-    } catch (_) {}
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) return;
   }
+  if (permission == LocationPermission.deniedForever) return;
+
+  try {
+    final pos = await Geolocator.getCurrentPosition();
+    _currentLocation = '${pos.latitude},${pos.longitude}';
+    notifyListeners();
+  } catch (_) {}
+}
+
+Future<void> fetchWeather() async {
+  final service = WeatherService();
+  final data = await service.fetchCurrentWeather();
+  _weather = data;
+  notifyListeners();
+}
+
 
   // Lista događaja
   final List<Event> _events = [];
