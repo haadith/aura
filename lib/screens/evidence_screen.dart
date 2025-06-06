@@ -49,10 +49,6 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
         title: const Text("Evidencija napada"),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refreshHealthData,
-          ),
-          IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
               Navigator.push(
