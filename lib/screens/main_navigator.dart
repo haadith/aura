@@ -4,6 +4,7 @@ import 'test_screen.dart';
 import 'history_screen.dart';
 import '../state/app_state.dart';
 import 'evidence_screen.dart';
+import 'daily_therapy_screen.dart';
 
 
 class MainNavigator extends StatefulWidget {
@@ -20,19 +21,21 @@ class _MainNavigatorState extends State<MainNavigator> {
   Widget build(BuildContext context) {
     final showTest = context.watch<AppState>().showTestTab;
 
-    // If the test tab is disabled while it was active, reset to the first tab
-    if (!showTest && _currentIndex >= 2) {
-      _currentIndex = 0;
-    }
-
     final screens = [
       const EvidenceScreen(),
+      const DailyTherapyScreen(),
       const HistoryScreen(),
       if (showTest) const TestScreen(),
     ];
 
+    // If the test tab is disabled while it was active, reset to the first tab
+    if (_currentIndex >= screens.length) {
+      _currentIndex = 0;
+    }
+
     final items = [
       const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Početna'),
+      const BottomNavigationBarItem(icon: Icon(Icons.medication), label: 'Terapija'),
       const BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Istorija'),
       if (showTest)
         const BottomNavigationBarItem(icon: Icon(Icons.science), label: 'Test'),

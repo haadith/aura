@@ -5,6 +5,7 @@ class CustomButton extends StatefulWidget {
   final String label;
   final IconData icon;
   final VoidCallback onPressed;
+  final VoidCallback? onLongPress;
   final Color backgroundColor;
   final Color textColor;
   final double borderRadius;
@@ -17,6 +18,7 @@ class CustomButton extends StatefulWidget {
     required this.label,
     required this.icon,
     required this.onPressed,
+    this.onLongPress,
     this.backgroundColor = Colors.grey,
     this.textColor = Colors.white,
     this.borderRadius = 12,
@@ -52,6 +54,7 @@ class _CustomButtonState extends State<CustomButton> {
         height: widget.height,
         child: ElevatedButton.icon(
           onPressed: widget.onPressed,
+          onLongPress: widget.onLongPress,
           icon: Icon(widget.icon, color: widget.textColor),
           label: Text(
             widget.label,
